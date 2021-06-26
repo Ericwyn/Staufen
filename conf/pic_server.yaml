@@ -1,0 +1,9 @@
+db:
+  address: tcp(localhost:3306)/staufen?charset=utf8
+  account: staufen
+  password: staufen
+  showSql: true
+server:
+  port: 9000
+path:
+  picData: ./pic_data
