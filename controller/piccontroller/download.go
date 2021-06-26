@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const maxAge = 3600 * 48 // 48小时过去
+
 func downloadPic(ctx *gin.Context) {
 	// 获取 query id
 	// id 可能是 ucekmwgfmbhpa31y3t5lsqfptmuwhuhw 也可能是 ucekmwgfmbhpa31y3t5lsqfptmuwhuhw.jpg 之类的
@@ -26,15 +28,16 @@ func downloadPic(ctx *gin.Context) {
 	}
 
 	// 搜索 bucket 是否为 public
-	// TODO 此处无法获取 bucket
 	bucket := bucketrepo.GetBucketById(picture.BucketId)
 	if bucket != nil && !bucket.Public {
 		ctx.JSON(200, resErrorToken("need reqToken to get file"))
 		return
 	}
 
-	picFile := storage.GetPic(picture.FilePath)
-	if picFile == nil {
+	// 直接返回 IO 流
+	picFileBytes := storage.GetPicBytes(picture.FilePath, storage.LocalFile)
+
+	if picFileBytes == nil {
 		ctx.JSON(200, resFileNotFound("read file error"))
 		return
 	}
@@ -44,6 +47,22 @@ func downloadPic(ctx *gin.Context) {
 	//ctx.Header("Content-Transfer-Encoding", "binary")
 	//os.ReadFile()
 	//ctx.Data(200, "", io)
-	// TODO 文件路径修改
-	ctx.File(picture.FilePath)
+
+	//ctx.Header("Cache-Control", fmt.Sprint("max-age=",maxAge))
+
+	ctx.Data(200, getContentType(picture.ExtName), picFileBytes)
+}
+
+func getContentType(extName string) string {
+	extName = strings.ToLower(extName)
+	if strings.Index(extName, "jpg") >= 0 {
+		return "image/jpeg"
+	} else if strings.Index(extName, "jpeg") >= 0 {
+		return "image/jpeg"
+	} else if strings.Index(extName, "png") >= 0 {
+		return "image/png"
+	} else if strings.Index(extName, "gif") >= 0 {
+		return "image/gif"
+	}
+	return ""
 }

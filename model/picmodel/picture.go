@@ -11,20 +11,20 @@ import (
 
 // 保存图片，并返回一个图片的 id
 func SavePicFile(bucketId int64, picFile *multipart.FileHeader) (string, error) {
-	picPath, err := storage.SavePic(picFile)
+	picPath, err := storage.SavePic(picFile, storage.LocalFile)
 	if err != nil {
 		return "", err
 	}
 
 	picSave := repo.Picture{
 		//Id:         0,
-		Uuid:       gen.GeneralUuid(),
-		FileName:   picFile.Filename,
-		FilePath:   picPath,
-		ExtName: strutil.GetExtName(picFile.Filename),
+		Uuid:     gen.GeneralUuid(),
+		FileName: picFile.Filename,
+		FilePath: picPath,
+		ExtName:  strutil.GetExtName(picFile.Filename),
 		//CreateTime: time.Time{},
 		//UpdateTime: time.Time{},
-		BucketId:   bucketId,
+		BucketId: bucketId,
 	}
 
 	err = picrepo.SavePicture(picSave)
