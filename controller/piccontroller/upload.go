@@ -1,6 +1,7 @@
 package piccontroller
 
 import (
+	"github.com/Ericwyn/Staufen/model/authmodel"
 	"github.com/Ericwyn/Staufen/model/picmodel"
 	"github.com/Ericwyn/Staufen/repo/bucketrepo"
 	"github.com/Ericwyn/Staufen/util/log"
@@ -18,7 +19,14 @@ func uploadPic(ctx *gin.Context) {
 		ctx.JSON(200, resErrorToken("token nil"))
 		return
 	}
-	if !checkUploadToken(bucketUuid, uploadToken) {
+
+	bucket := bucketrepo.GetBucketByUuid(bucketUuid)
+	if bucket == nil {
+		ctx.JSON(200, resErrorToken("bucket uuid error"))
+		return
+	}
+
+	if !authmodel.CheckUploadToken(*bucket, uploadToken) {
 		ctx.JSON(200, resErrorToken("token error or expired"))
 		return
 	}
@@ -27,12 +35,6 @@ func uploadPic(ctx *gin.Context) {
 	file, err := ctx.FormFile("pic")
 	if err != nil {
 		ctx.JSON(200, resFileError("file nil"))
-		return
-	}
-
-	bucket := bucketrepo.GetBucketByUuid(bucketUuid)
-	if bucket == nil {
-		ctx.JSON(200, resErrorToken("bucket uuid error"))
 		return
 	}
 

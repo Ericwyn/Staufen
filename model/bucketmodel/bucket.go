@@ -19,6 +19,7 @@ func CreateBucket(bucketName string, public bool, compress bool) (*repo.Bucket, 
 		ReqToken: gen.GeneralUuid(),
 		Public:   public,
 		Compress: compress,
+		Salt:     gen.GeneralRandomStr(10),
 		//CreateTime: time.Time{},
 		//UpdateTime: time.Time{},
 	}

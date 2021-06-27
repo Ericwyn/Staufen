@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Ericwyn/Staufen/model/authmodel"
 	"github.com/Ericwyn/Staufen/model/bucketmodel"
 	"github.com/Ericwyn/Staufen/repo"
 	"github.com/Ericwyn/Staufen/repo/bucketrepo"
@@ -35,6 +36,10 @@ func cliHome() {
 				Key:   "3",
 				Value: "delete bucket",
 			},
+			{
+				Key:   "4",
+				Value: "get upload token",
+			},
 		})
 		switch input {
 		case "0":
@@ -49,6 +54,9 @@ func cliHome() {
 			//cliUploadFile()
 		case "3":
 			deleteBucket()
+			break
+		case "4":
+			getUploadToken()
 			break
 		case "x":
 			return
@@ -150,6 +158,19 @@ func deleteBucket() {
 			fmt.Println(err)
 		}
 	}
+}
+
+func getUploadToken() {
+	fmt.Println("请输入 bucket 的 Id")
+	fmt.Print(">>:")
+	var bucketId int64
+	fmt.Scanf("%d", &bucketId)
+	bucket := bucketrepo.GetBucketById(bucketId)
+	if bucket == nil {
+		fmt.Println("输入错误，无法找到 bucket")
+		return
+	}
+	fmt.Println(authmodel.GetUploadToken(*bucket))
 }
 
 type inputSelect struct {

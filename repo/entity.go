@@ -7,7 +7,8 @@ type Bucket struct {
 	BucketId   string    `xorm:"varchar(32) notnull unique 'bucket_id'"`
 	Name       string    `xorm:"varchar(200) notnull 'name' comment('bucket名称')"`
 	ApiToken   string    `xorm:"varchar(64) notnull unique 'api_token'"`
-	ReqToken   string    `xorm:"varchar(64) notnull unique 'req_token'"`
+	ReqToken   string    `xorm:"varchar(64) notnull 'req_token'"`
+	Salt       string    `xorm:"varchar(64) notnull 'salt' comment('token计算salt')"`
 	Public     bool      // 公共
 	Compress   bool      // 存储到 bucket 里面的时候是否压缩图片
 	CreateTime time.Time `xorm:"created"`
