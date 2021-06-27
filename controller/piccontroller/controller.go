@@ -27,6 +27,7 @@ func initApi(router *gin.Engine) {
 	router.POST("/api/v1/pic/upload", uploadPic)
 	router.GET("/pic/*picUuid", downloadPic)
 
+	router.POST("/api/v1/pic/getUploadToken", GetUploadToken)
 }
 
 // 启动一个图片上传和下载服务器

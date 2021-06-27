@@ -43,6 +43,20 @@ func GetBucketByUuid(bucketUuid string) *repo.Bucket {
 	}
 }
 
+func GetBucketByApiToken(apiToken string) *repo.Bucket {
+	bucket := new(repo.Bucket)
+	res, err := repo.SqlEngine.Where("api_token=?", apiToken).Get(bucket)
+	if err != nil {
+		log.E("get bucket error : ", bucket, err)
+		return nil
+	}
+	if res {
+		return bucket
+	} else {
+		return nil
+	}
+}
+
 func UpdateBucket(bucket repo.Bucket) error {
 	bucketSave := new(repo.Bucket)
 	_, err := repo.SqlEngine.ID(bucket.Id).Get(&bucketSave)
