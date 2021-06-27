@@ -18,6 +18,10 @@
     - 数据存储模块
         - 输入一个文件
         - 返回一个地址
+    - 支持多种底层文件存储
+        - LocalFile
+        - COS(TODO)
+        - HDFS(TODO)
 
 - server 模块
     - picServer

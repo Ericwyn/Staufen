@@ -96,6 +96,17 @@ func GetPicBytes(picPath string, saveType SaveType) []byte {
 	}
 }
 
+func DeletePics(picPaths []string, saveType SaveType) {
+	for _, picPath := range picPaths {
+		DeletePic(picPath, saveType)
+	}
+}
+
+func DeletePic(picPath string, saveType SaveType) error {
+	//open, err := os.Open(picPath)
+	return os.Remove(picPath)
+}
+
 // 基于上传时间节点，获取年/月/日
 func getSaveDirPath() string {
 	picDataPath := viper.GetString("path.picData")

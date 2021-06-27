@@ -3,6 +3,7 @@ package bucketrepo
 import (
 	"github.com/Ericwyn/Staufen/repo"
 	"github.com/Ericwyn/Staufen/util/log"
+	"xorm.io/xorm"
 )
 
 func SaveBucket(bucket repo.Bucket) error {
@@ -64,12 +65,20 @@ func UpdateBucket(bucket repo.Bucket) error {
 	return nil
 }
 
-func DeleteBucket(bucket repo.Bucket) error {
-	_, err := repo.SqlEngine.ID(bucket.Id).Delete(bucket)
-	if err != nil {
-		return err
+func DeleteBucket(bucket repo.Bucket, session *xorm.Session) error {
+	if session != nil {
+		_, err := session.ID(bucket.Id).Delete(bucket)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		_, err := repo.SqlEngine.ID(bucket.Id).Delete(bucket)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
 }
 
 func ListBucket() ([]repo.Bucket, error) {
