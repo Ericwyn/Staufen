@@ -24,7 +24,7 @@ func main() {
 
 	if *picServer {
 		//CreateNewBucket()
-		ListAllBucketNow()
+		//ListAllBucketNow()
 		// 启动 http 服务器
 		piccontroller.StartPicHttpServer()
 		return

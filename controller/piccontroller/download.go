@@ -33,8 +33,11 @@ func downloadPic(ctx *gin.Context) {
 	// 搜索 bucket 是否为 public
 	bucket := bucketrepo.GetBucketById(picture.BucketId)
 	if bucket != nil && !bucket.Public {
-		ctx.JSON(200, resErrorToken("need reqToken to get file"))
-		return
+		reqToken := ctx.Query("reqToken")
+		if reqToken != bucket.ReqToken {
+			ctx.JSON(200, resErrorToken("need reqToken to get file"))
+			return
+		}
 	}
 
 	var picFileBytes []byte

@@ -2,7 +2,7 @@ db:
   address: tcp(localhost:3306)/staufen?charset=utf8
   account: staufen
   password: staufen
-  showSql: true
+  showSql: false
 server:
   port: 9000
 path:
