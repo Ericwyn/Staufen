@@ -38,7 +38,7 @@ func uploadPic(ctx *gin.Context) {
 		return
 	}
 
-	fileId, err := picmodel.SavePicFile(bucket.Id, file)
+	fileId, err := picmodel.SavePicFile(*bucket, file)
 	// 保存到数据库当中
 
 	if err != nil {

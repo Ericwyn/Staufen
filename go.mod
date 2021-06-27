@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/spf13/viper v1.8.1
 	xorm.io/xorm v1.1.0
 )

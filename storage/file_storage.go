@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bytes"
 	"github.com/Ericwyn/GoTools/date"
+	"github.com/Ericwyn/Staufen/util/compress"
 	"github.com/Ericwyn/Staufen/util/gen"
 	"github.com/Ericwyn/Staufen/util/log"
 	"github.com/Ericwyn/Staufen/util/strutil"
@@ -20,10 +22,18 @@ type SaveType string
 const LocalFile SaveType = "LocalFile" // 本地存储
 // TODO 支持 HDFS，COS
 
-// 保存图片，返回一个文件地址
-func SavePic(picFile *multipart.FileHeader, saveType SaveType) (string, error) {
+type FileQuality int
 
-	fileSaveName := gen.GeneralRandomStr(10) + strutil.GetExtName(picFile.Filename)
+var mini FileQuality = 1
+var middle FileQuality = 1
+
+var MiniQuality *FileQuality = &mini
+var MiddleQuality *FileQuality = &middle
+
+// 保存图片，返回一个文件地址
+func SavePic(picFile *multipart.FileHeader, compressFlag bool, saveType SaveType) (string, error) {
+	randomId := gen.GeneralRandomStr(10)
+	fileSaveName := randomId + "." + strutil.GetExtName(picFile.Filename)
 	savePath := getSaveDirPath() + "/" + fileSaveName
 
 	out, err := os.Create(savePath)
@@ -31,16 +41,47 @@ func SavePic(picFile *multipart.FileHeader, saveType SaveType) (string, error) {
 		return "", err
 	}
 
-	defer out.Close()
-
 	open, err := picFile.Open()
 	if err != nil {
 		return "", err
 	}
-
-	defer open.Close()
-
 	_, err = io.Copy(out, open)
+
+	_ = out.Close()
+	_ = open.Close()
+
+	// 如果压缩的话需要再保存两遍，一个 mini 尺寸(高300), 一个 middle 尺寸(高 1000 )
+	if compressFlag {
+		// 获取原始图片的 bytes
+
+		compressOriginFile, err := picFile.Open()
+
+		buf := bytes.NewBuffer(nil)
+		_, _ = io.Copy(buf, compressOriginFile)
+
+		originalBytes := buf.Bytes()
+
+		if err != nil {
+			log.E(err)
+		}
+		miniCompressBytes, _ := compress.CompressImg(originalBytes, picFile.Filename, compress.QualityMini)
+		if miniCompressBytes != nil {
+			//fileSaveName := randomId + ".mini." + strutil.GetExtName(picFile.Filename)
+			//savePath := getSaveDirPath() + "/" + fileSaveName
+
+			_ = ioutil.WriteFile(savePath+".mini", miniCompressBytes, 0777)
+		}
+
+		middleCompressBytes, _ := compress.CompressImg(originalBytes, picFile.Filename, compress.QualityMiddle)
+		if middleCompressBytes != nil {
+			//fileSaveName := randomId + ".middle." + strutil.GetExtName(picFile.Filename)
+			//savePath := getSaveDirPath() + "/" + fileSaveName
+
+			_ = ioutil.WriteFile(savePath+".middle", middleCompressBytes, 0777)
+		}
+
+		_ = compressOriginFile.Close()
+	}
 
 	if err != nil {
 		return "", err
@@ -49,34 +90,14 @@ func SavePic(picFile *multipart.FileHeader, saveType SaveType) (string, error) {
 	}
 }
 
-//func GetPic(picPath string) *os.File {
-//	fileOpen, err := os.Open(picPath)
-//	if err != nil {
-//		log.E("open file error :"+picPath, " --> ", err)
-//		return nil
-//	} else {
-//		return fileOpen
-//	}
-//	//return nil
-//}
-
-//// 直接返回 IO 流程
-//func GetPicIO(picPath string, saveType SaveType) *io.Reader {
-//	fileOpen, err := os.Open(picPath)
-//	if err != nil {
-//		log.E("open file error :"+picPath, " --> ", err)
-//		return nil
-//	} else {
-//		//reader := bufio.NewReader(fileOpen)
-//		//return reader.
-//		//defer fileOpen.Close()
-//		var read io.Reader = fileOpen
-//		return &read
-//	}
-//}
-
 // 直接返回 IO 流程
-func GetPicBytes(picPath string, saveType SaveType) []byte {
+func GetPicBytes(picPath string, quality *FileQuality, saveType SaveType) []byte {
+	if quality == MiniQuality {
+		picPath = picPath + ".mini"
+	}
+	if quality == MiddleQuality {
+		picPath = picPath + ".middle"
+	}
 	fileOpen, err := os.Open(picPath)
 	if err != nil {
 		log.E("open file error :"+picPath, " --> ", err)

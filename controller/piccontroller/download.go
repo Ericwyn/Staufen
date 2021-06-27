@@ -15,6 +15,9 @@ func downloadPic(ctx *gin.Context) {
 	// id 可能是 ucekmwgfmbhpa31y3t5lsqfptmuwhuhw 也可能是 ucekmwgfmbhpa31y3t5lsqfptmuwhuhw.jpg 之类的
 	// 所以需要先去除后缀
 	picUuid := ctx.Param("picUuid")
+
+	query := ctx.Query("type")
+
 	picUuid = strings.Replace(picUuid, "/", "", -1)
 	if strings.Index(picUuid, ".") >= 0 {
 		picUuid = strings.Split(picUuid, ".")[0]
@@ -34,8 +37,16 @@ func downloadPic(ctx *gin.Context) {
 		return
 	}
 
+	var picFileBytes []byte
+
+	if query == "mini" {
+		picFileBytes = storage.GetPicBytes(picture.FilePath, storage.MiniQuality, storage.LocalFile)
+	} else if query == "middle" {
+		picFileBytes = storage.GetPicBytes(picture.FilePath, storage.MiddleQuality, storage.LocalFile)
+	} else {
+		picFileBytes = storage.GetPicBytes(picture.FilePath, nil, storage.LocalFile)
+	}
 	// 直接返回 IO 流
-	picFileBytes := storage.GetPicBytes(picture.FilePath, storage.LocalFile)
 
 	if picFileBytes == nil {
 		ctx.JSON(200, resFileNotFound("read file error"))
